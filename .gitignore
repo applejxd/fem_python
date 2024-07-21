@@ -195,6 +195,4 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 
 # user added
-*.msh
-*.mesh
-*.vtk
+data/

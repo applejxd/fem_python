@@ -49,6 +49,13 @@ class HeatTransfer:
         return u_init
 
     def coeff(self, diffusivity: float, theta: float) -> List[scipy.sparse.csr_matrix]:
+        """
+        拡散方程式
+
+        :param diffusivity: 拡散係数
+        :param theta: 差分のパラメータ. (0 が現ステップの空間差分のみ (陽公式). 1 が次ステップの空間差分のみ (陰公式).)
+        :return: u_{t+1}, u_t の係数行列
+        """
         # ΔT・u -> -Tr(∇T・(∇u)^T)
         L = diffusivity * asm(laplace, self.basis)
         # T・u（現時刻の解）
@@ -60,6 +67,7 @@ class HeatTransfer:
             # see https://github.com/kinnala/scikit-fem/blob/40e4f4e05b0127909325c8dba0891cced7adb02e/skfem/utils.py#L40
             L, M = penalize(L, M, D=self.basis.get_dofs())
 
+        # 陰公式 (theta=0.5 が Crank-Nicolson)
         # see https://itpass.scitec.kobe-u.ac.jp/~fourtran/FB-kobe/2011-FB-kobe/seminar-9/text/seminar-9.pdf
         # see https://www.astr.tohoku.ac.jp/~chinone/pdf/Diffusion_equation.pdf
         A = M + theta * L * self.dt
@@ -73,7 +81,7 @@ class HeatTransfer:
         while t < t_max:
             t = t + self.dt
 
-            # 直接法
+            # LU 分解をしてから直接法で解く
             # Au_t=Bu_{t-1} & A=LU -> Au_t=LUu_t=Bu_{t-1} -> Uu_t=y & Ly=Bu_{t-1}
             u = splu(self.A.T).solve(self.B @ u)
             yield t, u

@@ -11,6 +11,8 @@ from skfem import *
 from skfem.models.poisson import laplace, mass
 from skfem.visuals.matplotlib import draw, plot
 
+from fem_python import utils
+
 
 def create_basis(mesh):
     element = ElementTriP1()
@@ -123,23 +125,8 @@ class AnimCreator:
             plt.show()
         else:
             file_name = Path(__file__).with_suffix(".gif")
-            anim.save(file_name, writer="pillow", dpi=300)
-
-            # GIF動画を読み込む
-            gif = cv2.VideoCapture(file_name)
-            # フレームを配列に格納する
-            frames = []
-            while True:
-                ret, frame = gif.read()
-                if not ret:
-                    break
-                frames.append(frame)
-            # フレームをループして表示する
-            while True:
-                for frame in frames:
-                    cv2.imshow("GIF", frame)
-                    if cv2.waitKey(100) & 0xFF == 27:
-                        break
+            anim.save(file_name, writer="pillow", dpi=100)
+            utils.play_gif(file_name)
 
 
 if __name__ == "__main__":
